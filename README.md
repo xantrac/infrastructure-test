@@ -1,66 +1,316 @@
-# SalesLoft Engineering Enablement Exercise
+![ROX by Rollout](https://1ko9923xosh2dsbjsxpwqp45-wpengine.netdna-ssl.com/wp-content/themes/rollout/images/rollout_white_logo1.png)
 
-SalesLoft is looking to add weather information to our app. Why? I dunno, Product Management is weird. 
+[![Integration status](https://app.rollout.io/badges/5e34eba7be11cd00091e4def)](https://app.rollout.io/app/5e34eb48be11cd00091e4dea/settings/info)
 
-Anyways, we need to set up a small proxy service so that we can abstract away the provider we use behind the scenes. Engineering Enablement is kicking off this project so we can get all the plumbing hooked up and good to go for development to add caching, service load balancing, and other complex things. 
+This repository is a YAML represnetation for Rollout configuration, it is connected (see badge for status) to Rollout service via [Rollout's github app](https://github.com/apps/rollout-io)
+Configuration as code allows the entire configuration of Rollout's state to be stored as source code. It integrates Rollout's UI with engineering existing environment. This approach brings a lot of benefits.
 
-They will need:
-- The initial API
-- A basic test suite
-- CI to be setup
-- A Docker-ized application
-- Deployment files for Kubernetes
 
-## What You Get
+# What is Rollout 
+Rollout is a multi-platform, infrastructure as code, open source, software as a service feature management and remote configuration solution. 
 
-[Phoenix](https://phoenixframework.org/) has been set up and is available to run the application server. Ecto has been disabled, as you won't need a database for this service. The frontend assets have also been disabled, but feel free to build a pretty GUI if you have heaps of free time.
+# What Are Feature Flags
 
-[ExUnit](https://hexdocs.pm/ex_unit/) is also set up with some scaffolding in place. You must fill this in with your own tests.
+Feature Flags is a powerfull technique based on remotetly and conditionaly opening/closing features threw the entire feature developement and delivery process.  As Martin Fowler writes on [Feature Toggles (aka Feature Flags)](https://martinfowler.com/articles/feature-toggles.html)
 
-[Envy](https://github.com/BlakeWilliams/envy) is set up and the `.env` file is gitignored so you can use configuration secrets safely.
+> Feature Toggles (often also refered to as Feature Flags) are a powerful technique, allowing teams to modify system behavior without changing code. They fall into various usage categories, and it's important to take that categorization into account when implementing and managing toggles. Toggles introduce complexity. We can keep that complexity in check by using smart toggle implementation practices and appropriate tools to manage our toggle configuration, but we should also aim to constrain the number of toggles in our system.
 
-No HTTP client is provided, but we like using [HTTPoison](https://github.com/edgurgel/httpoison).
+You can read more about the Advantages of having Rollout configuration stored and treated as code in [Rollout's support doc](https://support.rollout.io/docs/configuration-as-code)
 
-## Expected API
 
-Your mission, if you choose to accept it, is to get weather information from [Dark Sky's API](https://darksky.net/dev) and present it as an HTTP API. You will need to get your own API key from Dark Sky, but they are free. **Please don't commit your API key into the repository or publish it to a Docker registry!**
+# Repository, Directories and YAML structure
+## Branches are Environments
 
-`/weather?latitude&longitude` is the expected input for a location (e.g., `/weather?latitude=33.7984&longitude=-84.3883`). 
+Every environment on Rollout dashboard is mapped to a branch in git. The same name that is used for the environment will be used for the branch name. The only exception being Production environment which is mapped to `master` branch 
 
-It should return JSON with the current weather and 7 day forecast. The response looks like this:
-```json
-{
-  "date": "2018-01-23",
-  "type": "partly-cloudy-day",
-  "description": "Partly Cloudy",
-  "temperature": 61.78,
-  "wind": {
-    "speed": 4.66,
-    "bearing": 147
-  },
-  "precip_prob": 0,
-  "daily": [
-    {
-      "date": "2018-01-23",
-      "type": "partly-cloudy-day",
-      "description": "Mostly cloudy throughout the day.",
-      "temperature": {
-        "low": 46.78,
-        "high": 68.66
-      }
-    },
-    ...
-  ]
-}
+## Directory structure
+
+Rollout repository integration creates the following directory structure:
+```
+.
+├── experiments             # Experiments definitions
+│   └──  archived           # Archived experiments definitions
+├── target_groups           # Target groups definitions
+└── README.md              
 ```
 
-## CI and Deployment
+- All experiments are located under the experiment folder
+- All archived experiments are located under the `experiments/archived` folder
 
-You may use any CI system you like, as long as it works with Docker. We use [Codeship](http://codeship.com/) at SalesLoft, but it is not required.
+## Experiment Examples
 
-For deployment, we use Kubernetes, so the app will need to run within a Docker container and you can re-use the container from the tests. We don't need to have the container image available publicly, just this repository.
+### False for all users 
+```yaml
+flag: default.followingView
+type: experiment
+name: following view
+value: false
+```
+This YAML representation in Rollout's dashboard:
+![dashboard](https://files.readme.io/00b37e6-Screen_Shot_2018-12-03_at_11.47.56.png)
+### 50% split
+```yaml
+flag: default.followingView
+type: experiment
+name: following view
+value:
+  - option: true
+    percentage: 50
+```
+This YAML representation in Rollout's dashboard:
+![dashboard](https://files.readme.io/5af4d9e-Screen_Shot_2018-12-03_at_12.01.28.png)
+### Open feature for QA and Beta Users on version 3.0.1, otherwise close it
+```yaml
+flag: default.followingView
+type: experiment
+name: following view
+conditions:
+  - group:
+      name:
+        - QA
+        - Beta Users
+    version:
+      operator: semver-gte
+      semver: 3.0.1
+    value: true
+value: false
+```
+This YAML representation in Rollout's dashboard:
+![dashboard](https://files.readme.io/6884476-Screen_Shot_2018-12-03_at_12.04.13.png)
+### Open feature for all platform beside Android
+```yaml
+flag: default.followingView
+type: experiment
+name: following view
+platforms:
+  - name: Android
+    value: false
+value: true
+```
+Dashboard default platfrom configuration:
+![dashboard](https://files.readme.io/461c854-Screen_Shot_2018-12-04_at_10.19.59.png)
+Dashboard Android configuration:
+![dashboard](https://files.readme.io/1aafd04-Screen_Shot_2018-12-03_at_21.39.52.png)
+## Experiment YAML 
 
-If you don't have a Kubernetes cluster available, you can run one locally with [Minikube](https://kubernetes.io/docs/setup/minikube/) or remotely with [Katacode](https://www.katacoda.com/courses/kubernetes/playground) or [Play with Kubernetes](https://labs.play-with-k8s.com/).
+This section describes the yaml scheme for an experiment. It is a composite of 3 schemas:
 
-In the end, you should be able to push to Github and have the test suite run. And we should be able to add the Kubernetes resources to a cluster and be able to access the API. 
 
+-  [Root schema ](doc:configuration-as-code#section-root-schema)  - the base schema for experiment
+-  [Splited Value schema](doc:configuration-as-code#section-splitedvalue-schema)  - Represents a splited value -  a value that is distributed among different instances based on percentage
+-  [Scheduled Value schema](doc:configuration-as-code#section-scheduledvalue-schema)  - Represents a scheduled value -  a value that is based on the time that the flag was evaluated
+-  [Condition schema](doc:configuration-as-code#section-condition-schema)  - Specify how to target a specific audience/device
+-  [Platform schema](doc:configuration-as-code#section-platform-schema)  - Specify how to target a specific platform
+
+
+
+### Root Schema 
+An Experiment controls the flag value in runtime:
+
+```yaml
+# Yaml api version 
+# Optional: defaults to "1.0.0"
+version: Semver 
+
+# Yaml Type (required)
+type: "experiment" 
+
+# The flag being controlled by this experiment (required)
+flag: String 
+
+# The available values that this flag can be
+# Optional=[false, true]
+availableValues: [String|Bool] 
+
+# The name of the experiment
+# Optional: default flag name
+name: String 
+
+# The Description of the experiment 
+# Optional=""
+description: String 
+
+# Indicates if the experiment is active
+# Optional=true
+enabled: Boolean 
+
+# Expriment lables
+# Optional=[]
+labels: [String]|String 
+
+# Stickiness property that controls percentage based tossing 
+# Optional="rox.distict_id"
+stickinessProperty: String
+
+# Platfrom explicit targeting 
+# Optional=[]
+platforms: [Platfrom]  # see Platfrom schema
+
+# Condition and values for default platfomr
+# Optional=[]
+conditions: [Condition] # see Condition schema
+
+# Value when no Condition is met
+# Optional
+#  false for boolean flags 
+#  [] for enum flags  (indicates default value)
+value: String|Boolean|[SplitedValue]|[ScheduledValue]
+```
+
+### SplitedValue Schema
+```yaml
+# Percentage, used for splitting traffic across different values
+# Optional=100
+percentage: Number
+
+# The Value to be delivered 
+option: String|Boolean 
+```
+### ScheduledValue Schema
+```yaml
+# The Date from which this value is relevant
+# Optional=undefined
+from: Date
+
+# Percentage, used for splitting traffic across different values
+# Optional=100
+percentage: Number
+```
+### Condition Schema
+
+The Condition is a pair of condition and value, an array of conditions can be viewed as an if-else statement by the order of conditions
+
+The schema contains three types of condition statements 
+- Dependency - express flag dependencies, by indicating flag name and expected value
+- Groups - a list of target-groups and the operator that indicates the relationship between them (`or`|`and`|`not`) 
+- Version -  comparing the version of 
+[/block]
+The relationship between these items is `and`, meaning:
+       If the dependency is met `and` Groups matches `and` Version matches  `then` flage=value
+
+Here is the Condition schema
+```yaml
+# Condition this flag value with another flag value
+dependency: 
+    # Flag Name
+    flag: String
+    # The expected Flag Value 
+    value: String|Boolean
+
+# Condition flag value based on target group(s)
+group: 
+    # The logical relationship between the groups 
+    # Optional = or
+    operator: or|and|not
+    
+    # Name of target groups
+    name: [String]|String
+
+# Condition flag value based release version
+version: 
+    # The operator to compare version 
+    operator: semver-gt|semver-gte|semver-eq|semver-ne|semver-lt|semver-lte
+
+    # The version to compare to 
+    semver: Semver
+
+# Value when Condition is met
+value: String|Boolean|[SplitedValue]|[ScheduledValue] 
+```
+### Platform Schema
+The platform object indicates a specific targeting for a specific platform
+
+```yaml
+# Name of the platform, as defined in the SDK running
+name: String
+
+# Override the flag name, when needed
+# Optional = experiment flag name
+flag: String
+
+# Condition and values for default platfomr
+# Optional=[]
+conditions: [Condition] # see Condition schema
+
+# Value when no Condition is met
+# Optional
+#  false for boolean flags 
+#  [] for enum flags  (indicates default value)
+value: String|Boolean|[SplitedValue]|[ScheduledValue] # see Value schema
+```
+
+
+## Target Group Examples
+### List of matching userid
+```yaml
+type: target-group
+name: QA
+conditions:
+  - operator: in-array
+    property: soundcloud_id
+    operand:
+      - 5c0588007cd291cca474454f
+      - 5c0588027cd291cca4744550
+      - 5c0588037cd291cca4744551
+      - 5c0588047cd291cca4744552
+      - 5c0588047cd291cca4744553
+```
+
+![dashboard](https://files.readme.io/7affbbe-Screen_Shot_2018-12-03_at_21.47.05.png)
+### Using number property for comparison
+
+```yaml
+type: target-group
+name: DJ
+conditions:
+  - operator: gte
+    property: playlist_count
+    operand: 100
+description: Users with a lot of playlists
+```
+
+On rollout Dashboard
+![dashboard](https://files.readme.io/dcb562f-Screen_Shot_2018-12-03_at_21.43.19.png)
+## Target Group YAML
+
+A Target group is a set of rules on top of custom properties that are defined in runtime, it is used in experiments conditions
+
+```yaml
+# Yaml api version 
+# Optional: defaults to "1.0.0"
+version: Semver
+
+# Yaml Type (required)
+type: "target-group"
+
+#Target Group Name
+name: String
+
+# Target Group description
+# Optional = ""
+description: String
+
+# The logical relationship between conditions
+# Optional = and
+operator: or|and
+
+# Array of Conditions that have a logical AND relationship between them
+conditions: 
+    # The Custom property to be conditioned (first operand)
+  - property: String
+
+    # The Operator of the confition 
+    operator: is-undefined|is-true|is-false|eq|ne|gte|gt|lt|lte|regex|semver-gt|semver-eq|semver-gte|semver-gt|semver-lt|semver-lte
+
+    # The Second operand of the condition
+    # Optional - Based on operator  (is-undefined, is-true, is-false)
+    operand: String|Number|[String]
+```
+
+# See Also:
+- Using Roxy docker image for Microservices Automated Testing and Local development [here](https://support.rollout.io/docs/microservices-automated-testing-and-local-development)
+- Configuration as Code advantages [here](https://support.rollout.io/docs/configuration-as-code#section-advantages-of-configuration-as-code)
+- Integration walkthrough [here](https://support.rollout.io/docs/configuration-as-code#section-connecting-to-github-cloud)
+
+
+Please contact support@rollout.io for any issues questions or suggestions you might have
