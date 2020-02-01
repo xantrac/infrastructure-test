@@ -1,0 +1,20 @@
+FROM elixir:1.9-alpine
+
+WORKDIR /app
+
+ENV MIX_ENV=test
+
+RUN apk add --update --no-cache git && \
+  mix local.hex --force && \
+  mix local.rebar --force
+
+COPY mix.exs mix.lock ./
+RUN mix do deps.get, deps.compile
+
+RUN mv mix.lock mix.lock.backup
+
+COPY . .
+
+RUN mv mix.lock.backup mix.lock
+
+RUN ["chmod", "+x", "./ci.sh"]

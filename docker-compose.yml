@@ -1,0 +1,8 @@
+version: "3"
+
+services:
+  phoenix:
+    build: .
+    image: marco/weather_app:v1
+    ports:
+      - "4000:4000"
