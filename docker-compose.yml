@@ -3,6 +3,9 @@ version: "3"
 services:
   phoenix:
     build: .
-    image: marco/weather_app:v1
+    image: mdcdll/weather:v1
+    environment:
+      - HOST=localhost
+      - PORT=4000
     ports:
       - "4000:4000"
