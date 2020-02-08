@@ -1,4 +1,5 @@
-defmodule DarkSkyClient do
+defmodule Weather.DarkSkyClient do
+  @spec get_forecast({any, any}) :: any
   def get_forecast({latitude, longitude}) do
     {:ok, response} =
       compose_url({latitude, longitude})

@@ -1,10 +1,13 @@
 defmodule WeatherWeb.WeatherController do
   use WeatherWeb, :controller
   alias Weather.DarkSkyClient
+  alias Weather.Forecast.Forecast
 
-  def index(conn, _params) do
-    {:ok, body} = DarkSkyClient.get_forecast({11, 22})
+  def index(conn, %{"latitude" => latitude, "longitude" => longitude}) do
+    forecast =
+      DarkSkyClient.get_forecast({latitude, longitude})
+      |> Forecast.generate_forecast()
 
-    render(conn, "index.json", %{foo: "bar"})
+    render(conn, "index.json", %{forecast: forecast})
   end
 end
