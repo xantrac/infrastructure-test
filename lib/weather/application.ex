@@ -6,8 +6,8 @@ defmodule Weather.Application do
   use Application
 
   def start(_type, _args) do
-    unless Application.get_env(:weather, :env) == :prod  do
-      Envy.auto_load
+    unless Application.get_env(:weather, :env) == :prod do
+      Envy.auto_load()
     end
 
     # List all child processes to be supervised
