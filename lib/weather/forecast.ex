@@ -7,7 +7,7 @@ defmodule Forecast do
             precip_prob: nil,
             daily: []
 
-  def create_forecast_from_request(%{"currently" => %{"time" => time, "icon" => type}}) do
+  def create_forecast_from_request(%{"time" => time, "icon" => type, "summary" => summary, "temperature" => temperature, "windBearing" => windBearing, "windGust" => windGust, "precipProbability" => precipProbability}}) do
     %__MODULE__{}
   end
 end
