@@ -7,10 +7,10 @@ defmodule Weather.Forecast.Daily do
               high: nil
             }
 
-  def generate_daily_forecast(list) do
-    Enum.map(list, fn day ->
-      forecast_from_map(day)
-    end)
+  def generate_daily_forecast(list, current_day) do
+    list
+    |> Enum.map(&forecast_from_map(&1))
+    |> Enum.filter(&(&1.date != current_day))
   end
 
   defp forecast_from_map(%{
