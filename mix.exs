@@ -20,7 +20,7 @@ defmodule Weather.MixProject do
   def application do
     [
       mod: {Weather.Application, []},
-      extra_applications: [:logger, :runtime_tools, :httpoison, :timex]
+      extra_applications: [:logger, :runtime_tools, :httpoison]
     ]
   end
 
@@ -46,7 +46,7 @@ defmodule Weather.MixProject do
       {:envy, "~> 1.1.1"},
       {:distillery, "~> 2.1"},
       {:httpoison, "~> 1.6"},
-      {:timex, "~> 3.0"}
+      {:mock, "~> 0.3.0", only: :test}
     ]
   end
 
