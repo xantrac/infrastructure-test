@@ -61,8 +61,7 @@ defmodule WeatherWeb.WeatherControllerTest do
 
   test "GET /weather, with bad parameters, it returns an error", %{conn: conn} do
     get_forecast_mock = fn {43, "banana"} ->
-      {:error,
-       %{"code" => 400, "error" => "Bad request"} }
+      {:error, %{"code" => 400, "error" => "Bad request"}}
     end
 
     Mock.with_mock DarkSkyClient, get_forecast: get_forecast_mock do

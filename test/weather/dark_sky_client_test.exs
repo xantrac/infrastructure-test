@@ -35,7 +35,8 @@ defmodule Weather.DarkSkyClientTest do
     end
 
     Mock.with_mock HTTPoison, get: get_mock do
-      assert DarkSkyClient.get_forecast({55, "banana"}) == {:error, %{"error_key" => "error_message"}}
+      assert DarkSkyClient.get_forecast({55, "banana"}) ==
+               {:error, %{"error_key" => "error_message"}}
     end
   end
 end
