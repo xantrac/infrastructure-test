@@ -1,13 +1,21 @@
 defmodule Weather.DarkSkyClient do
   @spec get_forecast({any, any}) :: any
   def get_forecast({latitude, longitude}) do
-    {:ok, response} =
-      compose_url({latitude, longitude})
-      |> HTTPoison.get([],
-        params: %{exclude: "minutely, hourly, alerts, flags"}
-      )
+    {:ok, request} = perform_request({latitude, longitude})
 
-    Jason.decode!(response.body)
+    IO.inspect(request)
+
+    case request.status_code do
+      200 -> {:ok, Jason.decode!(request.body)}
+      _ -> {:error, Jason.decode!(request.body)}
+    end
+  end
+
+  def perform_request({latitude, longitude}) do
+    compose_url({latitude, longitude})
+    |> HTTPoison.get([],
+      params: %{exclude: "minutely, hourly, alerts, flags"}
+    )
   end
 
   defp compose_url({latitude, longitude}) do

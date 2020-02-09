@@ -35,8 +35,18 @@ defmodule Weather.Forecast.ForecastTest do
 
     expected_response = %Weather.Forecast.Current{
       daily: [
-        %Weather.Forecast.Daily{date: "1970-1-15", description: "it's rainy", temperature: %{high: 80, low: 68}, type: "rainy"},
-        %Weather.Forecast.Daily{date: "1970-2-18", description: "it's sunny", temperature: %{high: 45, low: 23}, type: "sunny"}
+        %Weather.Forecast.Daily{
+          date: "1970-1-15",
+          description: "it's rainy",
+          temperature: %{high: 80, low: 68},
+          type: "rainy"
+        },
+        %Weather.Forecast.Daily{
+          date: "1970-2-18",
+          description: "it's sunny",
+          temperature: %{high: 45, low: 23},
+          type: "sunny"
+        }
       ],
       date: "1970-5-30",
       description: "it'sunny",

@@ -6,5 +6,5 @@ data:
   ELIXIR_ENV: prod
   HOST: localhost
   PORT: "80"
-  DARK_SKY_KEY: dark_sky_key_here
+  DARK_SKY_KEY: dark_sky_key
   REPLACE_OS_VARS: "true"
