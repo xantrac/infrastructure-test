@@ -19,7 +19,23 @@ defmodule Weather.DarkSkyClientTest do
     end
 
     Mock.with_mock HTTPoison, get: get_mock do
-      assert DarkSkyClient.get_forecast({55, 55}) == %{"some value" => "some key"}
+      assert DarkSkyClient.get_forecast({55, 55}) == {:ok, %{"some value" => "some key"}}
+    end
+  end
+
+  test "get_forecast, with bad parameters, returns a json decoded error" do
+    get_mock = fn "https://api.darksky.net/forecast/banana/55,banana",
+                  _headers,
+                  params: %{exclude: "minutely, hourly, alerts, flags"} ->
+      {:ok,
+       %HTTPoison.Response{
+         body: "{\"error_key\" : \"error_message\"}",
+         status_code: 400
+       }}
+    end
+
+    Mock.with_mock HTTPoison, get: get_mock do
+      assert DarkSkyClient.get_forecast({55, "banana"}) == {:error, %{"error_key" => "error_message"}}
     end
   end
 end

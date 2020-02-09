@@ -3,8 +3,6 @@ defmodule Weather.DarkSkyClient do
   def get_forecast({latitude, longitude}) do
     {:ok, request} = perform_request({latitude, longitude})
 
-    IO.inspect(request)
-
     case request.status_code do
       200 -> {:ok, Jason.decode!(request.body)}
       _ -> {:error, Jason.decode!(request.body)}
@@ -19,7 +17,7 @@ defmodule Weather.DarkSkyClient do
   end
 
   defp compose_url({latitude, longitude}) do
-    "#{base_url}/#{dark_sky_key}/#{latitude},#{longitude}"
+    "#{base_url()}/#{dark_sky_key()}/#{latitude},#{longitude}"
   end
 
   defp base_url do
