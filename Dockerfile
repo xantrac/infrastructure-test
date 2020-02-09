@@ -23,7 +23,5 @@ WORKDIR /app
 
 COPY --from=builder /app/releases/weather ./
 
-EXPOSE 80
-
 ENTRYPOINT ["./bin/weather"]
 CMD ["foreground"]

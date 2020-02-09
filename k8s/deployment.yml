@@ -15,5 +15,10 @@ spec:
       containers:
         - name: weather
           image: mdcdll/weather:v1
+          imagePullPolicy: "Always"
           ports:
             - containerPort: 4000
+          envFrom:
+            - configMapRef:
+                name: weather
+          args: ["foreground"]

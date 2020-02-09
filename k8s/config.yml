@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: weather
+data:
+  ELIXIR_ENV: prod
+  HOST: localhost
+  PORT: "80"
+  DARK_SKY_KEY: dark_sky_key_here
+  REPLACE_OS_VARS: "true"
